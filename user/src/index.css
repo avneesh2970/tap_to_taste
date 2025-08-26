@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  body {
+    @apply bg-amber-50 text-gray-900 font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all duration-200 border border-gray-200 shadow-sm hover:shadow-md;
+  }
+
+  .btn-cart {
+    @apply bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200;
+  }
+
+  .dish-card {
+    @apply bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:scale-102;
+  }
+
+  .input {
+    @apply bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200;
+  }
+
+  .textarea {
+    @apply bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none transition-all duration-200;
+  }
+}
+
+/* ///////////////////////google font //////////////////////////// */
+/* .lobster-two-regular {
+  font-family: "Lobster Two", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.lobster-two-bold {
+  font-family: "Lobster Two", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.lobster-two-regular-italic {
+  font-family: "Lobster Two", sans-serif;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.lobster-two-bold-italic {
+  font-family: "Lobster Two", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+} */
+
+.lobster-regular {
+  font-family: "Lobster", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
