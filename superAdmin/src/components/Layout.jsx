@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   Megaphone,
-  Inbox
+  Inbox,
+  FileText,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
@@ -29,7 +30,8 @@ const Layout = ({ children }) => {
     { name: "Orders", href: "/orders", icon: ShoppingBag },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
     { name: "Ads", href: "/ads", icon: Megaphone },
-    { name: "Submissions", href: "/submissions", icon: Inbox }
+    { name: "Submissions", href: "/submissions", icon: Inbox },
+    { name: "Blogs", href: "/blogs", icon: FileText },
   ];
 
   const handleLogout = () => {

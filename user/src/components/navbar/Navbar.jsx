@@ -7,28 +7,15 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const onHome = location.pathname === "/";
-
-  // const navItems = [
-  //   { name: "Home", path: "/" },
-  //   { name: "Features", path: "/features" },
-  //   { name: "Pricing", path: "/pricing" },
-  //   { name: "About Us", path: "/about" },
-  //   { name: "Contact Us", path: "/contact" },
-  // ];
   const items = [
     { name: "Home", id: "home" },
     { name: "Features", id: "features" },
     { name: "Pricing", id: "pricing" },
     { name: "About Us", id: "about" },
     { name: "Contact Us", id: "contact" },
+    { name: "Blog", path: "/blog" },
   ];
 
-  // const navLinkClasses = ({ isActive }) =>
-  //   `block py-2 px-1 transition-colors duration-200 ${
-  //     isActive
-  //       ? "text-yellow-500 font-semibold"
-  //       : "hover:text-black text-gray-700"
-  //   }`;
   const linkBase =
     "block py-2 px-1 transition-colors duration-200 hover:text-yellow-400 text-gray-700";
   const activeClass = "text-yellow-500 font-semibold";
@@ -38,14 +25,6 @@ export default function Navbar() {
       <div className="flex items-center justify-between px-6 lg:px-20 py-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 text-xl font-semibold">
-          {/* <img
-            src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png"
-            alt="logo"
-            className="w-6 h-6"
-          /> */}
-          {/* <span className="text-4xl font-extrabold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-md hover:drop-shadow-xl transition-all duration-300">
-            TapToTaste
-          </span> */}
           <span className="lobster-regular text-3xl text-orange-600">
             Tap to Taste
           </span>
@@ -53,9 +32,15 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <ul className="hidden lg:flex gap-8 text-gray-700 font-medium cursor-pointer">
-          {items.map(({ name, id }) => (
-            <li key={id}>
-              {onHome ? (
+          {items.map(({ name, id, path }) => (
+            <li key={name}>
+              {path ? (
+                // Normal route navigation for Blog
+                <Link to={path} className={linkBase}>
+                  {name}
+                </Link>
+              ) : onHome ? (
+                // Scroll navigation (homepage)
                 <ScrollLink
                   to={id}
                   smooth={true}
@@ -68,6 +53,7 @@ export default function Navbar() {
                   {name}
                 </ScrollLink>
               ) : (
+                // Link back to homepage with hash
                 <Link to={`/#${id}`} className={linkBase}>
                   {name}
                 </Link>
@@ -101,8 +87,17 @@ export default function Navbar() {
         }`}
       >
         <div className="px-6 pb-4 flex flex-col gap-3 text-gray-700 font-medium">
-          {items.map(({ name, id }) =>
-            onHome ? (
+          {items.map(({ name, id, path }) =>
+            path ? (
+              <Link
+                key={name}
+                to={path}
+                className={linkBase}
+                onClick={() => setIsOpen(false)}
+              >
+                {name}
+              </Link>
+            ) : onHome ? (
               <ScrollLink
                 key={id}
                 to={id}

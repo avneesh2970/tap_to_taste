@@ -103,17 +103,6 @@ const SubscriptionCard = ({ plan, isActive, onUpgrade, onCancel, loading }) => {
             <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg text-sm font-medium">
               Current Plan
             </div>
-            {/* {isPremium && (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onCancel}
-                disabled={loading}
-                className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm font-medium disabled:opacity-50"
-              >
-                {loading ? "Processing..." : "Cancel Subscription"}
-              </motion.button>
-            )} */}
           </div>
         ) : (
           <motion.button

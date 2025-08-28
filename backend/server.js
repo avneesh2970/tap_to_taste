@@ -13,8 +13,10 @@ import orderRoutes from "./routes/orders.js";
 import superadminRoutes from "./routes/superadmin.js";
 import subscriptionRoutes from "./routes/subscriptions.js";
 import adsRoutes from "./routes/ads.js";
-import contactRoutes from "./routes/contactRoutes.js"
+import contactRoutes from "./routes/contactRoutes.js";
 import quoteRoutes from "./routes/quoteRoutes.js";
+import blogRoutes from "./routes/blogs/blogRoute.js";
+import { uploadBlogImage } from "./config/multerConfig.js";
 
 dotenv.config();
 
@@ -97,6 +99,13 @@ app.use("/api/ads", adsRoutes);
 //submissions
 app.use("/api/contact", contactRoutes);
 app.use("/api/quotes", quoteRoutes);
+
+//blog routes
+// app.get("/api/get-blog", getAllBlogs);
+// app.get("/api/get-blog/:slug", getBlogByslug);
+// app.post("/api/blog", uploadBlogImage.single("featuredImage"), uploadBlog);
+
+app.use("/api", blogRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

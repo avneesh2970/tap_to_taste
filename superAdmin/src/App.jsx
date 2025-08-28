@@ -16,6 +16,7 @@ import Analytics from "./pages/Analytics";
 import Layout from "./components/Layout";
 import Ads from "./pages/Ads";
 import Submissions from "./pages/Submissions";
+import NewBlogPost from "./pages/blogs/NewBlogPost";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth(); // Added loading state
@@ -51,6 +52,7 @@ function App() {
                       <Route path="/analytics" element={<Analytics />} />
                       <Route path="/ads" element={<Ads />} />
                       <Route path="/submissions" element={<Submissions />} />
+                      <Route path="/blogs" element={<NewBlogPost />} />
                     </Routes>
                   </Layout>
                 </ProtectedRoute>

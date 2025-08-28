@@ -22,6 +22,16 @@ const dishStorage = new CloudinaryStorage({
   },
 })
 
+// Blog images storage
+const blogStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "restaurant-platform/blogs",
+    allowed_formats: ["jpg", "jpeg", "png", "webp", "avif"],
+    transformation: [{ width: 800, height: 600, crop: "limit" }, { quality: "auto" }],
+  },
+})
+
 // Multer middleware configurations
 export const uploadRestaurantImage = multer({
   storage: restaurantStorage,
@@ -32,6 +42,14 @@ export const uploadRestaurantImage = multer({
 
 export const uploadDishImage = multer({
   storage: dishStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+})
+
+
+export const uploadBlogImage = multer({
+  storage: blogStorage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },

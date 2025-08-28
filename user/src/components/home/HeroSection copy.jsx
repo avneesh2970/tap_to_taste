@@ -84,48 +84,48 @@ export default function HeroSection() {
   };
 
   return (
-    <div id="home" className="relative w-full bg-white pt-14 mt-20">
-      <div className="max-w-7xl flex flex-col lg:flex-row items-center justify-center lg:items-start px-6 lg:px-10 gap-10 mx-auto">
-        {/* Left Side Content */}
-        <div className="flex-1 flex flex-col justify-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-gray-900 md:text-left text-center text-4xl lg:text-6xl font-bold leading-tight"
+    <div id="home" className="relative w-full overflow-hidden pt-14">
+      {/* Background Image */}
+      <img
+        src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092"
+        alt="food-bg"
+        className="w-full h-[90vh] object-cover rounded-b-[32px]"
+      />
+
+      {/* Black Overlay */}
+      <div className="absolute inset-0 bg-black/55 z-10"></div>
+
+      {/* Content */}
+      <div className="absolute inset-0 z-20 flex flex-col justify-center items-center px-6 lg:px-20">
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-white text-center text-4xl lg:text-6xl font-semibold max-w-3xl leading-tight"
+        >
+          Enhance Guest Experience with Technology
+        </motion.h1>
+        <p className="text-white mt-4 max-w-xl text-base lg:text-lg text-center">
+          Offer a faster, safer, and contactless dining experience with a simple
+          QR scan — no physical menus, just seamless service.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          <a
+            href={import.meta.env.VITE_ADMIN_SIGNUP_URL || "/"}
+            className="flex items-center gap-2 bg-[#ff6900] hover:bg-[#ff2f00] transition text-white font-semibold py-2.5 px-5 rounded-full"
           >
-            Enhance Guest Experience with Technology
-          </motion.h1>
-
-          <p className="text-gray-600 mt-4 max-w-xl text-base lg:text-lg text-center md:text-center mx-auto">
-            Offer a faster, safer, and contactless dining experience with a
-            simple QR scan — no physical menus, just seamless service.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 mt-8 sm:justify-center md:justify-center lg:justify-start">
-            <a
-              href={import.meta.env.VITE_ADMIN_SIGNUP_URL || "/"}
-              className="flex items-center gap-2 bg-[#ff6900] hover:bg-[#ff2f00] transition text-white font-semibold py-2.5 px-5 rounded-full"
-            >
-              Get Started For Free <ArrowRight size={24} />
-            </a>
-            <button
-              onClick={() => setIsQuoteOpen(true)}
-              className="flex items-center gap-2 border border-gray-400 hover:border-orange-400 hover:text-orange-400 transition text-gray-800 font-semibold py-2.5 px-5 rounded-full"
-            >
-              Request a Quote <ArrowRight size={16} />
-            </button>
-          </div>
+            Get Started For Free <ArrowRight size={24} />
+          </a>
+          <button
+            onClick={() => setIsQuoteOpen(true)}
+            className="flex items-center gap-2 border border-white hover:border-orange-400 hover:text-orange-400 transition text-white font-semibold py-2.5 px-5 rounded-full"
+          >
+            Request a Quote <ArrowRight size={16} />
+          </button>
         </div>
 
-        {/* Right Side Image (Visible on desktop) */}
-        <div className="flex-1 flex justify-center mt-8 lg:mt-0">
-          <img
-            src="/hero.png"
-            alt="food"
-            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-md object-contain"
-          />
-        </div>
+   
       </div>
 
       {/* ===== Quote Modal ===== */}
@@ -156,7 +156,6 @@ export default function HeroSection() {
                 Request a Quote
               </h2>
 
-              {/* Form (same as before) */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-gray-700 font-medium">
@@ -168,7 +167,7 @@ export default function HeroSection() {
                     value={quoteForm.name}
                     onChange={handleChange}
                     required
-                    className="w-full mt-2 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                    className="w-full mt-2 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-orange-400 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -228,14 +227,14 @@ export default function HeroSection() {
                   whileTap={{ scale: loading ? 1 : 0.95 }}
                   type="submit"
                   disabled={loading}
-                  className={`w-full py-3 rounded-xl text-white font-semibold shadow-md transition 
-                ${
-                  loading
-                    ? "bg-orange-300 cursor-not-allowed"
-                    : "bg-orange-400 hover:bg-orange-500"
-                }`}
+                  className={`w-full py-3 rounded-xl text-black font-semibold shadow-md transition 
+    ${
+      loading
+        ? "bg-yellow-300 cursor-not-allowed"
+        : "bg-yellow-400 hover:bg-yellow-500"
+    }`}
                 >
-                  {loading ? "Submitting..." : "Submit Quote Request"}
+                  {loading ? "Submitting..." : "Submit Quote Request 🚀"}
                 </motion.button>
               </form>
             </motion.div>
