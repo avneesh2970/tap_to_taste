@@ -16,6 +16,7 @@ import Orders from "./pages/Orders";
 import Analytics from "./pages/Analytics";
 import Layout from "./components/Layout";
 import Plans from "./pages/Plans";
+import AccessControl from "./pages/AccessControl";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth(); // Added loading state
@@ -51,6 +52,7 @@ function App() {
                       <Route path="/orders" element={<Orders />} />
                       <Route path="/analytics" element={<Analytics />} />
                       <Route path="/plan" element={<Plans />} />
+                      <Route path="/access" element={<AccessControl />} />
                     </Routes>
                   </Layout>
                 </ProtectedRoute>
