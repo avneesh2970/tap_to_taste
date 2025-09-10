@@ -1,86 +1,132 @@
-"use client"
+"use client";
 
-import { createContext, useState, useEffect } from "react"
-import axios from "axios"
+import { createContext, useState, useEffect } from "react";
+import axios from "axios";
 
-const AuthContext = createContext()
+const AuthContext = createContext();
 
-export { AuthContext }
-
-// export const useAuth = () => {
-//   const context = useContext(AuthContext)
-//   if (!context) {
-//     throw new Error("useAuth must be used within an AuthProvider")
-//   }
-//   return context
-// }
+export { AuthContext };
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [userPermissions, setUserPermissions] = useState([]);
 
-  const API_URL = import.meta.env.VITE_BACKEND_API
+  const API_URL = import.meta.env.VITE_BACKEND_API;
+
+  // 🔎 helper: fetch permissions for staff
+  const fetchUserPermissions = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/user-access/my-permissions`);
+      setUserPermissions(response.data.permissions || []);
+    } catch (error) {
+      console.error("Error fetching user permissions:", error);
+      setUserPermissions([]);
+    }
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem("admin_token")
-        console.log("Checking auth, token exists:", !!token) // Added debug logging
+        const token = localStorage.getItem("token");
+        const staffToken = localStorage.getItem("staffToken");
 
-        if (!token) {
-          console.log("No token found, setting loading to false")
-          setLoading(false)
-          return
+        if (!token && !staffToken) {
+          console.log("No token found, setting loading to false");
+          setLoading(false);
+          return;
         }
 
         // Set axios header before making the request
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
+        axios.defaults.headers.common["Authorization"] = `Bearer ${
+          token ? token : staffToken
+        }`;
 
         // Verify token with backend
-        const response = await axios.get(`${API_URL}/auth/me`)
-        console.log("Token verification successful:", response.data) // Added debug logging
+        const response = await axios.get(`${API_URL}/auth/me`);
 
-        setIsAuthenticated(true)
-        setUser(response.data.user)
+        setIsAuthenticated(true);
+        setUser(response.data.user);
+
+        // Fetch permissions if staff
+        if (response.data.user?.role === "staff") {
+          await fetchUserPermissions();
+        }
+
+        if (
+          localStorage.getItem("admin_token") &&
+          !localStorage.getItem("token")
+        ) {
+          localStorage.setItem("token", token);
+          localStorage.removeItem("admin_token");
+        }
       } catch (error) {
-        console.error("Token verification failed:", error)
-        // Token is invalid, remove it
-        localStorage.removeItem("admin_token")
-        delete axios.defaults.headers.common["Authorization"]
-        setIsAuthenticated(false)
-        setUser(null)
+        console.error("Token verification failed:", error);
+        // Token is invalid, remove both possible token keys
+        localStorage.removeItem("admin_token");
+        localStorage.removeItem("token");
+        delete axios.defaults.headers.common["Authorization"];
+        setIsAuthenticated(false);
+        setUser(null);
       } finally {
-        console.log("Setting loading to false") // Added debug logging
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    checkAuth()
-  }, [])
+    checkAuth();
+  }, []);
 
   const login = async (email, password) => {
     try {
       const response = await axios.post(`${API_URL}/auth/login`, {
         email,
         password,
-      })
+      });
 
-      const { token, user } = response.data
-      localStorage.setItem("admin_token", token)
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
+      // const { token, user } = response.data;
+      const user = response.data.user;
+      const token = response.data?.token;
+      const staffToken = response.data?.staffToken;
 
-      setIsAuthenticated(true)
-      setUser(user)
+      if (token) {
+        localStorage.setItem("token", token);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      return { success: true }
+        setIsAuthenticated(true);
+        setUser(user);
+      } else if (staffToken) {
+        localStorage.setItem("staffToken", staffToken);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${staffToken}`;
+
+        setIsAuthenticated(true);
+        setUser(user);
+      }
+      // Fetch permissions if staff
+      if (user?.role === "staff") {
+        await fetchUserPermissions();
+      }
+
+      return { success: true };
     } catch (error) {
+      const errorData = error.response?.data;
+
+      // Handle staff password setup requirement
+      if (errorData?.requiresPasswordSetup) {
+        return {
+          success: false,
+          requiresPasswordSetup: true,
+          email: errorData.email,
+          message: errorData.message,
+        };
+      }
+
       return {
         success: false,
-        message: error.response?.data?.message || "Login failed",
-      }
+        message: errorData?.message || "Login failed",
+      };
     }
-  }
+  };
 
   const signup = async (name, email, password) => {
     try {
@@ -88,39 +134,74 @@ export const AuthProvider = ({ children }) => {
         name,
         email,
         password,
-      })
+      });
 
-      const { token, user } = response.data
-      localStorage.setItem("admin_token", token)
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
+      const { token, user } = response.data;
+      localStorage.setItem("token", token);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      setIsAuthenticated(true)
-      setUser(user)
+      setIsAuthenticated(true);
+      setUser(user);
 
-      return { success: true }
+      return { success: true };
     } catch (error) {
       return {
         success: false,
         message: error.response?.data?.message || "Signup failed",
-      }
+      };
     }
-  }
+  };
 
   const logout = () => {
-    localStorage.removeItem("admin_token")
-    delete axios.defaults.headers.common["Authorization"]
-    setIsAuthenticated(false)
-    setUser(null)
-  }
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("token");
+    localStorage.removeItem("staffToken");
+    delete axios.defaults.headers.common["Authorization"];
+    setIsAuthenticated(false);
+    setUser(null);
+    setUserPermissions([]);
+  };
+
+  const setupStaffPassword = async (email, password, name) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/auth/setup-staff-password`,
+        {
+          email,
+          password,
+          name,
+        }
+      );
+
+      const { token, user } = response.data;
+      localStorage.setItem("token", token);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      setIsAuthenticated(true);
+      setUser(user);
+      if (user?.role === "staff") {
+        await fetchUserPermissions();
+      }
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to set password",
+      };
+    }
+  };
 
   const value = {
     isAuthenticated,
     user,
+    userPermissions,
     login,
     signup,
     logout,
     loading,
-  }
+    setupStaffPassword,
+  };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

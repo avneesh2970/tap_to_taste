@@ -11,10 +11,16 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    password: { type: String, required: true, minlength: 6 },
-    role: { type: String, enum: ["admin", "superadmin"], default: "admin" },
+    password: { type: String, minlength: 6 },
+    role: {
+      type: String,
+      enum: ["admin", "superadmin", "staff"],
+      default: "admin",
+    },
     isBlocked: { type: Boolean, default: false },
     restaurant: { type: mongoose.Schema.Types.ObjectId, ref: "Restaurant" },
+    invitedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    isActive: { type: Boolean },
     subscription: {
       plan: { type: String, enum: ["free", "premium"], default: "free" },
       status: {

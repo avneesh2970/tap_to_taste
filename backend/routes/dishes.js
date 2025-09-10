@@ -1,13 +1,13 @@
 import express from "express"
 import Dish from "../models/Dish.js"
 import Restaurant from "../models/Restaurant.js"
-import { auth, adminAuth } from "../middleware/auth.js"
+import { auth, checkTabPermission } from "../middleware/auth.js"
 import { uploadDishImage } from "../config/multerConfig.js"
 
 const router = express.Router()
 
 // Create dish
-router.post("/", auth, adminAuth, uploadDishImage.single("image"), async (req, res) => {
+router.post("/", auth, checkTabPermission("Dishes"), uploadDishImage.single("image"), async (req, res) => {
   try {
     const { name, description, price, category, isVeg, spiceLevel, preparationTime } = req.body
 
@@ -77,7 +77,7 @@ router.get("/restaurant/:restaurantId", async (req, res) => {
 })
 
 // Get admin's dishes
-router.get("/my-dishes", auth, adminAuth, async (req, res) => {
+router.get("/my-dishes", auth, checkTabPermission("Dishes"), async (req, res) => {
   try {
     if (!req.user.restaurant) {
       return res.status(400).json({ message: "No restaurant found" })
@@ -92,7 +92,7 @@ router.get("/my-dishes", auth, adminAuth, async (req, res) => {
 })
 
 // Update dish
-router.put("/:id", auth, adminAuth, uploadDishImage.single("image"), async (req, res) => {
+router.put("/:id", auth, checkTabPermission("Dishes"), uploadDishImage.single("image"), async (req, res) => {
   try {
     const dish = await Dish.findById(req.params.id)
 
@@ -134,7 +134,7 @@ router.put("/:id", auth, adminAuth, uploadDishImage.single("image"), async (req,
 })
 
 // Delete dish
-router.delete("/:id", auth, adminAuth, async (req, res) => {
+router.delete("/:id", auth, checkTabPermission("Dishes"), async (req, res) => {
   try {
     const dish = await Dish.findById(req.params.id)
 

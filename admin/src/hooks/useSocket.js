@@ -19,7 +19,7 @@ const useSocket = (serverPath = import.meta.env.VITE_SOCKET_URL) => {
     const socket = socketRef.current
 
     socket.on("connect", () => {
-      console.log("Connected to server")
+      // console.log("Connected to server")
       // Join admin room
       socket.emit("join-admin", user.id)
       // Join restaurant room if user has a restaurant
@@ -29,7 +29,7 @@ const useSocket = (serverPath = import.meta.env.VITE_SOCKET_URL) => {
     })
 
     socket.on("disconnect", () => {
-      console.log("Disconnected from server")
+      // console.log("Disconnected from server")
     })
 
     return () => {

@@ -33,6 +33,8 @@ const Login = () => {
 
     if (result.success) {
       navigate("/")
+    } else if (result.requiresPasswordSetup) {
+      navigate(`/setup-password?email=${encodeURIComponent(result.email)}`)
     } else {
       setError(result.message)
     }

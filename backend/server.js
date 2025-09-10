@@ -16,7 +16,9 @@ import adsRoutes from "./routes/ads.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import quoteRoutes from "./routes/quoteRoutes.js";
 import blogRoutes from "./routes/blogs/blogRoute.js";
-import { uploadBlogImage } from "./config/multerConfig.js";
+// import { uploadBlogImage } from "./config/multerConfig.js";
+import userAccessRoutes from "./routes/userAccess.js"
+import billRoutes from "./routes/bills.js"
 
 dotenv.config();
 
@@ -95,6 +97,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/superadmin", superadminRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/ads", adsRoutes);
+app.use("/api/bills", billRoutes)
+app.use("/api/user-access", userAccessRoutes);
 
 //submissions
 app.use("/api/contact", contactRoutes);

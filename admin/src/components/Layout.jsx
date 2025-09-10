@@ -1,4 +1,5 @@
-/* eslint-disable no-unused-vars */
+"use client";
+
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,32 +13,25 @@ import {
   X,
   IndianRupee,
   ShieldCheck,
-  Users,
-  Settings,
-  Bell,
-  FileText,
-  Calendar,
-  MapPin,
-  Truck,
-  Star,
-  CreditCard,
-  MessageSquare,
+  Receipt,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Outlet } from "react-router-dom"; // ✅ import Outlet
 import { useAuth } from "../hooks/useAuth";
 import axios from "axios";
 
-const Layout = ({ children }) => {
+const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [subscription, setSubscription] = useState({
     plan: "free",
     status: "active",
   });
+  const [userPermissions, setUserPermissions] = useState([]);
+  const [permissionsLoading, setPermissionsLoading] = useState(true);
+
   const { logout, user } = useAuth();
   const location = useLocation();
 
-  // Enhanced navigation with more items for demonstration
-  const navigation = [
+  const allNavigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Orders", href: "/orders", icon: ShoppingBag },
     { name: "Dishes", href: "/dishes", icon: ChefHat },
@@ -45,7 +39,30 @@ const Layout = ({ children }) => {
     { name: "Restaurant", href: "/restaurant", icon: Store },
     { name: "Plans", href: "/plan", icon: IndianRupee },
     { name: "Access Control", href: "/access", icon: ShieldCheck },
+    { name: "Billing", href: "/billing", icon: Receipt },
   ];
+
+  const getFilteredNavigation = () => {
+    if (user?.role === "admin" || user?.role === "superadmin") {
+      return allNavigation;
+    }
+
+    if (user?.role === "staff") {
+      return allNavigation.filter((navItem) => {
+        if (navItem.name === "Access Control") return false;
+        if (navItem.name === "Plans") return false;
+
+        const permission = userPermissions.find(
+          (p) => p.tabName === navItem.name
+        );
+        return permission?.hasAccess === true;
+      });
+    }
+
+    return allNavigation;
+  };
+
+  const navigation = getFilteredNavigation();
 
   const handleLogout = () => {
     logout();
@@ -62,13 +79,31 @@ const Layout = ({ children }) => {
     }
   };
 
+  const fetchUserPermissions = async () => {
+    try {
+      setPermissionsLoading(true);
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API}/user-access/my-permissions`
+      );
+      setUserPermissions(response.data.permissions || []);
+    } catch (error) {
+      console.error("Error fetching user permissions:", error);
+      setUserPermissions([]);
+    } finally {
+      setPermissionsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchSubscription();
-  }, []);
+    if (user) {
+      fetchUserPermissions();
+    }
+  }, [user]);
 
   const SidebarContent = ({ isMobile = false }) => (
     <div className="h-full flex flex-col bg-white">
-      {/* Header - Fixed */}
+      {/* Header */}
       <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
         <h1 className="text-xl font-bold text-green-600">Restaurant Admin</h1>
         {isMobile && (
@@ -81,66 +116,70 @@ const Layout = ({ children }) => {
         )}
       </div>
 
-      {/* Scrollable Navigation Area */}
+      {/* Navigation */}
       <div
         className="flex-1 overflow-y-auto px-4 py-6"
         style={{
-          maxHeight: "calc(100vh - 64px - 140px)", // Subtract header and footer height
+          maxHeight: "calc(100vh - 64px - 140px)",
           minHeight: "300px",
         }}
       >
-        <div className="space-y-1">
-          {navigation.map((item, index) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <motion.div
-                key={item.name}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.03, duration: 0.3 }}
-              >
-                <Link
-                  to={item.href}
-                  className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? "bg-gradient-to-r from-green-50 to-green-100 text-green-700 shadow-sm border-l-4 border-green-500"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm"
-                  }`}
-                  onClick={() => isMobile && setSidebarOpen(false)}
+        {permissionsLoading && user?.role === "staff" ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-sm text-gray-500">Loading permissions...</div>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {navigation.map((item, index) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <motion.div
+                  key={item.name}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.03, duration: 0.3 }}
                 >
-                  <item.icon
-                    className={`w-5 h-5 mr-3 transition-colors ${
+                  <Link
+                    to={item.href}
+                    className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                       isActive
-                        ? "text-green-600"
-                        : "text-gray-400 group-hover:text-gray-600"
+                        ? "bg-gradient-to-r from-green-50 to-green-100 text-green-700 shadow-sm border-l-4 border-green-500"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm"
                     }`}
-                  />
-                  <span className="truncate">{item.name}</span>
-                  {isActive && (
-                    <motion.div
-                      layoutId={`activeIndicator-${
-                        isMobile ? "mobile" : "desktop"
+                    onClick={() => isMobile && setSidebarOpen(false)}
+                  >
+                    <item.icon
+                      className={`w-5 h-5 mr-3 transition-colors ${
+                        isActive
+                          ? "text-green-600"
+                          : "text-gray-400 group-hover:text-gray-600"
                       }`}
-                      className="ml-auto w-2 h-2 bg-green-500 rounded-full"
-                      initial={false}
-                      transition={{
-                        type: "spring",
-                        stiffness: 500,
-                        damping: 30,
-                      }}
                     />
-                  )}
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
+                    <span className="truncate">{item.name}</span>
+                    {isActive && (
+                      <motion.div
+                        layoutId={`activeIndicator-${
+                          isMobile ? "mobile" : "desktop"
+                        }`}
+                        className="ml-auto w-2 h-2 bg-green-500 rounded-full"
+                        initial={false}
+                        transition={{
+                          type: "spring",
+                          stiffness: 500,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Fixed Bottom Section - User Info & Logout */}
+      {/* User Info & Logout */}
       <div className="border-t border-gray-200 bg-gray-50 p-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="mb-3"
@@ -157,13 +196,25 @@ const Layout = ({ children }) => {
                 <p className="text-xs text-gray-500 truncate">
                   {user?.email || "guest@example.com"}
                 </p>
+                {user?.role && (
+                  <span
+                    className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full mt-1 ${
+                      user.role === "admin"
+                        ? "bg-blue-100 text-blue-800"
+                        : user.role === "staff"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-purple-100 text-purple-800"
+                    }`}
+                  >
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </span>
+                )}
               </div>
             </div>
           </div>
         </motion.div>
 
         <motion.button
-          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           onClick={handleLogout}
@@ -178,7 +229,7 @@ const Layout = ({ children }) => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Mobile sidebar overlay */}
+      {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -203,9 +254,7 @@ const Layout = ({ children }) => {
       {/* Mobile Sidebar */}
       <motion.div
         initial={false}
-        animate={{
-          x: sidebarOpen ? 0 : "-100%",
-        }}
+        animate={{ x: sidebarOpen ? 0 : "-100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="fixed inset-y-0 left-0 z-50 w-64 lg:hidden shadow-2xl"
       >
@@ -214,7 +263,6 @@ const Layout = ({ children }) => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden lg:pl-64">
-        {/* Enhanced Top Bar */}
         <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 shadow-sm sticky top-0 z-20">
           {/* Mobile Menu Button */}
           <button
@@ -224,8 +272,8 @@ const Layout = ({ children }) => {
             <Menu className="w-5 h-5" />
           </button>
 
+          {/* Greeting + Plan */}
           <motion.div className="flex items-center w-full justify-between">
-            {/* Greeting */}
             <div className="text-sm text-gray-700 hidden sm:block">
               <span className="text-lg mr-2">👋</span>
               Hello,{" "}
@@ -234,7 +282,6 @@ const Layout = ({ children }) => {
               </span>
             </div>
 
-            {/* Plan Badge */}
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -255,7 +302,10 @@ const Layout = ({ children }) => {
                 <>
                   <motion.span
                     animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                    }}
                   >
                     🌟
                   </motion.span>
@@ -266,7 +316,6 @@ const Layout = ({ children }) => {
           </motion.div>
         </header>
 
-        {/* Page Content */}
         <main className="flex-1 overflow-auto">
           <div className="p-6">
             <motion.div
@@ -274,29 +323,11 @@ const Layout = ({ children }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              {children}
+              <Outlet /> {/* ✅ instead of {children} */}
             </motion.div>
           </div>
         </main>
       </div>
-
-      {/* Custom Scrollbar Styles */}
-      <style>{`
-        .flex-1.overflow-y-auto::-webkit-scrollbar {
-          width: 6px;
-        }
-        .flex-1.overflow-y-auto::-webkit-scrollbar-track {
-          background: #f1f5f9;
-          border-radius: 3px;
-        }
-        .flex-1.overflow-y-auto::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 3px;
-        }
-        .flex-1.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
-        }
-      `}</style>
     </div>
   );
 };
